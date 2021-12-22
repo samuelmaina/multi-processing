@@ -66,10 +66,36 @@ if __name__ == '__main__':
     print(f' Finished in {time_taken} seconds')
 
 
+
+    start= time.perf_counter()
+
+    processes= []
+    seconds=1.5
+    #run the two processes concurrently (the multiprocessing way) for many processes.
+    for _ in range(10):
+         p= Process(target=do_something_with_args, args=[seconds])
+         p.start()
+         #the join. can not be called here since all the process need to be started
+         #before any of them is joined. The process will be stored in a list  in which all 
+         #of them will be joined
+         processes.append(p)
+
+    for p in processes:
+        p.join()
+        
+    finish= time.perf_counter()
+
+    time_taken= round(finish-start,2)
+
+    #ensure that the process takes more than one second after the initial request.
+    assert time_taken< seconds+1,"The two processes should take less than 2 seconds."
+    print(f' Finished in {time_taken} seconds')
+
+
 def do_something_with_args(seconds):
-    print('Sleeping {seconds} second...')
+    print(f'Sleeping {seconds} second(s)...')
     time.sleep(seconds)
-    print('Sleeping {seconds} second...')
+    print('S leeping {seconds} second...')
 
 
 
