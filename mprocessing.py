@@ -11,9 +11,15 @@ def do_something():
 def do_something_with_args(seconds):
     print(f'Sleeping {seconds} second(s)...')
     time.sleep(seconds)
-    feedback= 'Done second...'
+    feedback= 'Done sleeping..'
     print(feedback)
-    return feedback
+
+
+def do_something_with_args_no_printing(seconds):
+    print(f'Sleeping {seconds} second(s)...')
+    time.sleep(seconds)
+    return 'Done sleeping...'
+
 
 
 
@@ -107,8 +113,8 @@ if __name__ == '__main__':
 
     with concurrent.futures.ProcessPoolExecutor() as executor:
         #return a future object that will be excuted.
-         results= [executor.submit(do_something_with_args, seconds) for _ in range(10)]
-       
+         secs=[5,4, 3, 2,1 ]
+         results= [executor.submit(do_something_with_args_no_printing, sec) for sec in secs]
          for f in concurrent.futures.as_completed(results):
           print(f.result())
     finish= time.perf_counter() 
@@ -116,11 +122,32 @@ if __name__ == '__main__':
 
 
     print(f' Finished in {time_taken} seconds')
-    assert time_taken< seconds+1,f"The two processes should take less than {seconds+1}seconds."
+    assert time_taken< 5+1,f"The processes should take less than {seconds+1}seconds."
 
 
 
 
+   #using the buildin map function that call  the passed function 
+   #with each item that is passed in the iterable.
+    start= time.perf_counter()
+
+    with concurrent.futures.ProcessPoolExecutor()   as executor:
+   
+         secs=[5,4, 3, 2,1 ]
+
+         #return  the result of the function with the order of which the 
+         #the process were started.
+         results= executor.map(do_something_with_args_no_printing,secs)
+        #  for result in results:
+        #      #For any execeptions that will be thrown in the multiprocessing ,
+        #      #they should be caught in the iterator.
+        #      print(result)
+    finish= time.perf_counter() 
+    time_taken= round(finish-start,2)
+
+ 
+    print(f' Finished running the mapped executor in {time_taken} seconds')
+    assert time_taken< 5+1,f"The processes should take less than {seconds+1}seconds."
 
 
 
