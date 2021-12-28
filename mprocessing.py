@@ -1,10 +1,20 @@
 from multiprocessing import Process
+import concurrent.futures
 import time
 
 def do_something():
     print('Sleeping 1 second...')
     time.sleep(1)
     print('Done sleeping...')
+
+
+def do_something_with_args(seconds):
+    print(f'Sleeping {seconds} second(s)...')
+    time.sleep(seconds)
+    feedback= 'Done second...'
+    print(feedback)
+    return feedback
+
 
 
 if __name__ == '__main__':
@@ -87,15 +97,32 @@ if __name__ == '__main__':
 
     time_taken= round(finish-start,2)
 
-    #ensure that the process takes more than one second after the initial request.
-    assert time_taken< seconds+1,"The two processes should take less than 2 seconds."
+     #give 1 second for context switching and other processes.
+    assert time_taken< seconds+1,f"The two processes should take less than {seconds+1}seconds."
     print(f' Finished in {time_taken} seconds')
 
 
-def do_something_with_args(seconds):
-    print(f'Sleeping {seconds} second(s)...')
-    time.sleep(seconds)
-    print('S leeping {seconds} second...')
+   #the ideal way of handling mutitprocessing
+    start= time.perf_counter()
+
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        #return a future object that will be excuted.
+         results= [executor.submit(do_something_with_args, seconds) for _ in range(10)]
+       
+         for f in concurrent.futures.as_completed(results):
+          print(f.result())
+    finish= time.perf_counter() 
+    time_taken= round(finish-start,2)
+
+
+    print(f' Finished in {time_taken} seconds')
+    assert time_taken< seconds+1,f"The two processes should take less than {seconds+1}seconds."
+
+
+
+
+
+
 
 
 
